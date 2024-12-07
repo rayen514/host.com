@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hacker Terminal</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #00ff00;
+      font-family: "Courier New", Courier, monospace;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .terminal {
+      padding: 20px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow-y: auto;
+    }
+
+    .output {
+      white-space: pre-wrap;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .input-line {
+      display: flex;
+      align-items: center;
+    }
+
+    .input-line span {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    input {
+      background: none;
+      border: none;
+      color: #00ff00;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1rem;
+      width: 100%;
+      outline: none;
+    }
+
+    @keyframes blink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .cursor {
+      animation: blink 1s infinite;
+      background-color: #00ff00;
+      width: 10px;
+      height: 20px;
+      display: inline-block;
+    }
+
+    .loading-bar {
+      width: 0%;
+      height: 5px;
+      background-color: #00ff00;
+      animation: loading 5s linear infinite;
+    }
+
+    @keyframes loading {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal" id="terminal">
+    <div class="output">
+      Welcome to the <span style="color: red;">Encrypted Hacker Terminal</span>.<br>
+      Type commands to navigate:<br>
+      - <span style="color: yellow;">googledevice</span>: Redirect to Google.<br>
+      - <span style="color: yellow;">wpddevice</span>: Redirect to the encrypted link.<br>
+      - <span style="color: yellow;">devicemy</span>: Display your device's information.<br>
+      - <span style="color: yellow;">locationmy</span>: Display your current location.<br>
+      - <span style="color: yellow;">ipaddress</span>: Display your IP address.<br>
+      - <span style="color: yellow;">wifiinfo</span>: Display information about your Wi-Fi network.<br>
+      - <span style="color: yellow;">listfiles</span>: List all files.<br>
+      - <span style="color: yellow;">cpuusage</span>: Show CPU usage.<br>
+      - <span style="color: yellow;">ramusage</span>: Show RAM usage.<br>
+      - <span style="color: yellow;">networkstatus</span>: Check network status.<br>
+      - <span style="color: yellow;">systemlog</span>: Show system logs.<br>
+      - <span style="color: yellow;">cleardata</span>: Clear all terminal output.<br>
+    </div>
+    <div class="input-line">
+      <span>></span>
+      <input type="text" id="commandInput" placeholder="Type your command here..." autofocus>
+    </div>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const input = document.getElementById('commandInput');
+
+    input.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        const command = input.value.trim();
+        if (command !== '') {
+          displayOutput(`> ${command}`);
+          handleCommand(command);
+          input.value = '';  // Clear input after execution
+        }
+      }
+    });
+
+    function displayOutput(text) {
+      const output = document.createElement('div');
+      output.classList.add('output');
+      output.textContent = text;
+      terminal.appendChild(output);
+      terminal.scrollTop = terminal.scrollHeight;  // Auto-scroll to the bottom
+    }
+
+    function handleCommand(command) {
+      switch (command) {
+        case 'googledevice':
+          displayOutput('Redirecting to Google...');
+          setTimeout(() => {
+            window.location.href = 'https://www.google.com';
+          }, 1000);
+          break;
+        case 'wpddevice':
+          displayOutput('Redirecting to encrypted link...');
+          setTimeout(() => {
+            window.location.href = 'https://rayen514.github.io/cryptage.com/';
+          }, 1000);
+          break;
+        case 'cleardata':
+          document.querySelector('.output').innerHTML = '';  // Clear all terminal output
+          displayOutput('Data cleared.');
+          break;
+        case 'devicemy':
+          displayDeviceInfo();
+          break;
+        case 'locationmy':
+          displayLocation();
+          break;
+        case 'ipaddress':
+          displayIpAddress();
+          break;
+        case 'wifiinfo':
+          displayWifiInfo();
+          break;
+        case 'listfiles':
+          displayFiles();
+          break;
+        case 'cpuusage':
+          displayCpuUsage();
+          break;
+        case 'ramusage':
+          displayRamUsage();
+          break;
+        case 'networkstatus':
+          displayNetworkStatus();
+          break;
+        case 'systemlog':
+          displaySystemLog();
+          break;
+        default:
+          displayOutput('Unknown command. Try again.');
+          break;
+      }
+    }
+
+    function displayDeviceInfo() {
+      const userAgent = navigator.userAgent;
+      const platform = navigator.platform;
+      const language = navigator.language;
+      const deviceInfo = `
+      Device Information:
+      - User Agent: ${userAgent}
+      - Platform: ${platform}
+      - Language: ${language}
+      `;
+      displayOutput(deviceInfo);
+    }
+
+    function displayLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            const locationInfo = `
+            Your Location:
+            - Latitude: ${latitude}
+            - Longitude: ${longitude}
+            `;
+            displayOutput(locationInfo);
+          },
+          (error) => {
+            displayOutput('Error retrieving location: ' + error.message);
+          }
+        );
+      } else {
+        displayOutput('Geolocation is not supported by your browser.');
+      }
+    }
+
+    function displayIpAddress() {
+      fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+          displayOutput(`Your IP Address: ${data.ip}`);
+        })
+        .catch(error => {
+          displayOutput('Error retrieving IP address: ' + error.message);
+        });
+    }
+
+    function displayWifiInfo() {
+      displayOutput('Wi-Fi information is not accessible due to browser security restrictions.');
+    }
+
+    function displayFiles() {
+      const files = [
+        'document.txt',
+        'image.jpg',
+        'passwords.txt',
+        'config.json'
+      ];
+      displayOutput('Listing Files: \n' + files.join('\n'));
+    }
+
+    function displayCpuUsage() {
+      displayOutput('Simulating CPU Usage: 45%');
+    }
+
+    function displayRamUsage() {
+      displayOutput('Simulating RAM Usage: 3.5GB of 8GB');
+    }
+
+    function displayNetworkStatus() {
+      displayOutput('Network Status: Connected to Wi-Fi.');
+    }
+
+    function displaySystemLog() {
+      const log = `
+      System Log:
+      - Boot time: 2024-12-07 12:34:00
+      - Last login: 2024-12-07 12:00:00
+      - Security: Firewall enabled
+      `;
+      displayOutput(log);
+    }
+  </script>
+</body>
+</html>
