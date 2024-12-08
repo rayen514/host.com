@@ -51,12 +51,8 @@
     }
 
     @keyframes blink {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0;
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
     }
 
     .cursor {
@@ -88,9 +84,8 @@
       - <span style="color: yellow;">googledevice</span>: Redirect to Google.<br>
       - <span style="color: yellow;">wpddevice</span>: Redirect to the encrypted link.<br>
       - <span style="color: yellow;">devicemy</span>: Display your device's information.<br>
-      - <span style="color: yellow;">locationmy</span>: Display your current location.<br>
+      - <span style="color: yellow;">locationmy</span>: Display your current location (country, altitude, and place).<br>
       - <span style="color: yellow;">ipaddress</span>: Display your IP address.<br>
-      - <span style="color: yellow;">wifiinfo</span>: Display information about your Wi-Fi network.<br>
       - <span style="color: yellow;">listfiles</span>: List all files.<br>
       - <span style="color: yellow;">cpuusage</span>: Show CPU usage.<br>
       - <span style="color: yellow;">ramusage</span>: Show RAM usage.<br>
@@ -114,7 +109,7 @@
         if (command !== '') {
           displayOutput(`> ${command}`);
           handleCommand(command);
-          input.value = '';  // Clear input after execution
+          input.value = ''; // Clear input after execution
         }
       }
     });
@@ -124,7 +119,7 @@
       output.classList.add('output');
       output.textContent = text;
       terminal.appendChild(output);
-      terminal.scrollTop = terminal.scrollHeight;  // Auto-scroll to the bottom
+      terminal.scrollTop = terminal.scrollHeight; // Auto-scroll to the bottom
     }
 
     function handleCommand(command) {
@@ -142,7 +137,8 @@
           }, 1000);
           break;
         case 'cleardata':
-          document.querySelector('.output').innerHTML = '';  // Clear all terminal output
+          const outputs = document.querySelectorAll('.output');
+          outputs.forEach(output => output.remove());
           displayOutput('Data cleared.');
           break;
         case 'devicemy':
@@ -154,20 +150,17 @@
         case 'ipaddress':
           displayIpAddress();
           break;
-        case 'wifiinfo':
-          displayWifiInfo();
-          break;
         case 'listfiles':
           displayFiles();
           break;
         case 'cpuusage':
-          displayCpuUsage();
+          displayOutput('Simulating CPU Usage: 45%');
           break;
         case 'ramusage':
-          displayRamUsage();
+          displayOutput('Simulating RAM Usage: 3.5GB of 8GB');
           break;
         case 'networkstatus':
-          displayNetworkStatus();
+          displayOutput('Network Status: Connected to Wi-Fi.');
           break;
         case 'systemlog':
           displaySystemLog();
@@ -196,12 +189,22 @@
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
-            const locationInfo = `
-            Your Location:
-            - Latitude: ${latitude}
-            - Longitude: ${longitude}
-            `;
-            displayOutput(locationInfo);
+            fetch(`https://geocode.maps.co/reverse?lat=${latitude}&lon=${longitude}`)
+              .then(response => response.json())
+              .then(data => {
+                const locationInfo = `
+                Location Details:
+                - Country: ${data.address.country || 'N/A'}
+                - Altitude: ${position.coords.altitude || 'N/A'} meters
+                - Place: ${data.display_name || 'N/A'}
+                - Latitude: ${latitude}
+                - Longitude: ${longitude}
+                `;
+                displayOutput(locationInfo);
+              })
+              .catch(() => {
+                displayOutput('Error retrieving location details.');
+              });
           },
           (error) => {
             displayOutput('Error retrieving location: ' + error.message);
@@ -223,10 +226,6 @@
         });
     }
 
-    function displayWifiInfo() {
-      displayOutput('Wi-Fi information is not accessible due to browser security restrictions.');
-    }
-
     function displayFiles() {
       const files = [
         'document.txt',
@@ -235,18 +234,6 @@
         'config.json'
       ];
       displayOutput('Listing Files: \n' + files.join('\n'));
-    }
-
-    function displayCpuUsage() {
-      displayOutput('Simulating CPU Usage: 45%');
-    }
-
-    function displayRamUsage() {
-      displayOutput('Simulating RAM Usage: 3.5GB of 8GB');
-    }
-
-    function displayNetworkStatus() {
-      displayOutput('Network Status: Connected to Wi-Fi.');
     }
 
     function displaySystemLog() {
